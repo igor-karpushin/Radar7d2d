@@ -1,0 +1,727 @@
+<html>
+<head>
+	<title>7DTD MAP</title>
+	<style>
+	body
+	{
+		margin: 0px;
+	}
+	
+	.noselect 
+	{
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+
+	body.compact 
+	{
+		overflow: hidden;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+		zoom: 100%;
+	}
+
+	#container
+	{
+		position: relative;
+		overflow: hidden;
+		display: block;
+		background-color: darkgray;
+	}
+
+	body.compact > #container
+	{
+		width: 250px;
+		height: 210px;
+	}
+
+	#container > div
+	{
+
+		position: absolute;
+		display: block;
+		left: 0px;
+		top: 0px;
+	}
+
+	#container > div#map 
+	{
+		filter: saturate(0.6);
+		z-index: 1;
+	}
+
+	#container > div#traders
+	{
+		z-index: 2;
+	}
+
+	#container > div#traders > div
+	{
+		position: absolute;
+	}
+
+	#container > div#traders > div.poi1
+	{
+		width: 30px;
+		height: 30px;
+		display: block;
+		background-image: url(./images/icon_trader.png);
+		background-size: 100% 100%;
+		opacity: 0.7;
+		transform: translate(10px, -38px);
+	}
+	
+	#container > div#traders > div.poi2
+	{
+		width: 30px;
+		height: 30px;
+		display: block;
+		background-image: url(./images/icon_book.png);
+		background-size: 100% 100%;
+		opacity: 0.7;
+		transform: translate(10px, -38px);
+	}
+	
+	#container > div#traders > div.poi3
+	{
+		width: 30px;
+		height: 30px;
+		display: block;
+		background-image: url(./images/icon_gun.png);
+		background-size: 100% 100%;
+		opacity: 0.7;
+		transform: translate(10px, -38px);
+	}
+
+	#container > div#compas
+	{
+		z-index: 3;
+		width: 400px;
+		height: 400px;
+		background-image: url(./images/compas.png);
+		position: fixed;
+		transform-origin: center;
+		left: calc(50% - 200px);
+		top: calc(50% - 200px);
+		opacity: 0.7;
+	}
+
+	body.compact > #container > div#compas
+	{
+		width: 200px;
+		height: 200px;
+		left: calc(50% - 100px);
+		top: calc(50% - 100px);
+		background-size: 100% 100%;
+	}
+
+	#container > div#entities
+	{
+		z-index: 4;
+	}
+
+
+	#entities > div
+	{
+		width: 10px;
+		height: 10px;
+		transition: all 0.6s cubic-bezier(0.73, 0.71, 1, 0.99);
+		background-size: 10px 10px;
+		transform: scale(1);
+		position: absolute;
+		transform-origin: center;
+	}
+
+	#entities > div.entity.type0,
+	#entities > div.entity.type2,
+	#entities > div.entity.type3,
+	#entities > div.entity.type5
+	{
+		background-image: url(./images/pin_undefined.png);
+	}
+
+	#entities > div.entity.type1
+	{
+		background-size: 18px 18px;
+		width: 17px;
+		height: 17px;
+		background-image: url(./images/pin_cars.png);
+	}
+
+	#entities > div.entity.type4
+	{
+		background-image: url(./images/pin_backpack.png?1);
+		background-size: 12px 14px;
+		width: 12px;
+		height: 14px;
+	}
+
+	#entities > div.entity.type6
+	{
+		background-size: 15px 15px;
+		width: 15px;
+		height: 15px;
+		background-image: url(./images/pin_animals.png);
+	}
+
+	#entities > div.entity.type7
+	{
+		background-image: url(./images/pin_zombie.png);
+	}
+
+	#entities > div.entity.type8 
+	{
+		background-image: url(./images/pin_enemy.png);
+		width: 20px;
+		height: 30px;
+		background-size: 22px 30px;
+		transform: scale(0.8);
+		transform-origin: center bottom;
+	}
+
+	#entities > div.entity.player 
+	{
+		background-image: url(./images/pin_player.png);
+	}
+
+	.distance 
+	{
+		position: absolute;
+		top: -12px;
+		width: 22px;
+		text-align: center;
+		font-size: 12px;
+		text-shadow: 1px 1px 2px white, 0 0 1em red;	
+	}
+
+	div#actions
+	{
+		position: fixed;
+		top: 5px;
+		left: 15px;
+		z-index: 12;
+	}
+
+	body.compact div#actions
+	{
+		display: none;
+	}
+
+	#follow
+	{
+		background: gray;
+		line-height: 10px;
+		font-size: 10px;
+		width: 60px;
+		position: relative;
+		border-radius: 4px;
+		cursor: pointer;
+	}
+	
+	#follow > input
+	{
+		margin: 0px;
+		position: absolute;
+		top: 2px;
+		left: 4px;
+		cursor: pointer;
+	}
+	
+	#follow > label
+	{
+		font-size: 12px;
+		margin: 0px;
+		padding-left: 20px;
+		line-height: 1.5;
+		cursor: pointer;
+	}
+
+	</style>
+	<script type="text/javascript">
+	var SpawnTypeIndex = 
+	{
+		Undefined 		: 0,
+		Cars 			: 1,
+		NPC				: 2,
+		SupplyCrates 	: 3,
+		Backpack 		: 4,        
+		Trader			: 5,
+		Animals			: 6,
+		Enemies			: 7,
+		Players			: 8
+	};
+
+	var SpawnTypeIndex2 = Object.keys(SpawnTypeIndex);
+	
+	class ByteRreader
+	{
+		#offset = 0;
+		#view;
+		
+		constructor(buffer)
+		{
+			this.#view = new DataView(buffer);
+		}
+		
+		ReadInt32()
+		{
+			let _result = this.#view.getInt32(this.#offset, true);
+			this.#offset += 4;
+			return _result;
+		}
+		
+		ReadInt8()
+		{
+			let _result = this.#view.getInt8(this.#offset, true);
+			this.#offset += 1;
+			return _result;
+		}
+				
+		ReadUint8()
+		{
+			let _result = this.#view.getUint8(this.#offset, true);
+			this.#offset += 1;
+			return _result;
+		}
+		
+		ReadUintBytes(length)
+		{
+			let result = new Uint8Array(length);
+			for(let i = 0; i < length; ++i)
+			{
+				result[i] = this.ReadUint8();
+			}
+			return result;
+		}
+		
+		Read7BitEncodedInt() {
+            let count = 0;
+            let shift = 0;
+            let b;
+            do {
+                if (shift == 5 * 7)
+                    return -1;
+                b = this.ReadInt8();
+                count |= (b & 0x7F) << shift;
+                shift += 7;
+            } while ((b & 0x80) != 0);
+            return count;
+        }
+		
+		#Utf8ArrayToStr(array) {
+			let out, i, len, c;
+			let char2, char3;
+
+			out = "";
+			len = array.length;
+			i = 0;
+			while (i < len) 
+			{
+				c = array[i++];
+				switch (c >> 4)
+				{ 
+					case 0:
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+						out += String.fromCharCode(c);
+						break;
+					case 12: 
+					case 13:
+						char2 = array[i++];
+						out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
+						break;
+					case 14:
+						char2 = array[i++];
+						char3 = array[i++];
+						out += String.fromCharCode(((c & 0x0F) << 12) |
+											   ((char2 & 0x3F) << 6) |
+											   ((char3 & 0x3F) << 0));
+						break;
+				}
+			}    
+			return out;
+		}
+		
+		ReadString()
+		{
+			let _length = this.Read7BitEncodedInt();
+			return this.#Utf8ArrayToStr(this.ReadUintBytes(_length));
+		}
+	}
+	
+	class Entity7d2d
+	{
+		#index = 0;
+		#type = -1;
+		#pos =  
+		{
+			x	: 0,
+			y	: 0,
+			z	: 0,
+		};
+		#health = 0;
+		#max_health = 0;
+		#name = "";
+		
+		#added = false;
+		
+		#html;
+		#distance;
+		
+		constructor(index)
+		{
+			this.#index = index;
+			let html = document.createElement('div');
+			html.classList.add("entity");
+			
+			let distance = document.createElement('span');
+			distance.innerHTML = "";
+			distance.classList.add("distance");
+			html.appendChild(distance);
+			
+			this.#html = html;
+			this.#distance = distance;
+			
+			if(index === _own)
+			{
+				this.player();
+			}	
+		}
+		
+		focus()
+		{
+			this.#html.scrollIntoView({block: "center", inline: "center"});
+		}
+		
+		added(container)
+		{
+			if(!this.#added)
+			{
+				this.#added = true;
+				container.appendChild(this.#html);
+			}
+		}
+		
+		remove()
+		{
+			this.#html.parentElement.removeChild(this.#html);
+		}
+		
+		distance(title)
+		{
+			this.#distance.innerHTML = title;
+		}
+		
+		get position()
+		{
+			return this.#pos;
+		}
+		
+		set type(value)
+		{
+			if(this.#type !== value)
+			{
+				this.#html.classList.remove("type" + this.#type);
+				this.#type = value;
+				this.#html.classList.add("type" + this.#type);
+				this.#html.setAttribute("style", "z-index: " + this.#type + ";");
+				this.#added = false;
+			}
+		}
+		
+		get type()
+		{
+			return this.#type;
+		}
+		
+		player()
+		{
+			this.#html.classList.add("player");
+		}
+		
+		update(reader)
+		{
+			this.type = reader.ReadInt8();
+			
+			this.#pos.x = reader.ReadInt32() / 32;
+			this.#pos.y = reader.ReadInt32() / 32;
+			this.#pos.z = reader.ReadInt32() / 32;
+			
+			let _delta_x = -13;
+			let _delta_z = -28;
+			
+			let _title = [];
+			_title.push("index:		" + this.#index);
+			
+			switch(this.#type)
+			{
+				case SpawnTypeIndex.Players:
+				
+					this.#health = reader.ReadInt32();
+					this.#max_health = reader.ReadInt32();
+					this.#name = reader.ReadString();
+					
+					_title.push("name:		" + this.#name);
+					_title.push("pos: 		" + this.#pos.x.toFixed(0) + "/" + this.#pos.z.toFixed(0));
+					_title.push("height: 	" + this.#pos.y.toFixed(0));
+					_title.push("health: 	" + this.#health);				
+					break;
+					
+				case SpawnTypeIndex.Cars:
+					_title.push("height: 	" + this.#pos.y.toFixed(0));
+					_delta_x += 1;
+					_delta_z += 14;
+					break;
+					
+				case SpawnTypeIndex.Animals:
+					_title.push("height: 	" + this.#pos.y.toFixed(0));
+					
+					_delta_x += 6;
+					_delta_z += 22;
+					break;
+					
+				case SpawnTypeIndex.Enemies:
+					_title.push("height: 	" + this.#pos.y.toFixed(0));
+					
+					_delta_x += 6;
+					_delta_z += 22;
+					break;
+					
+				default:
+					_title.push("height: 	" + this.#pos.y.toFixed(0));
+					_title.push("type: 		" + SpawnTypeIndex2[this.#type]);
+					
+					_delta_x += 6;
+					_delta_z += 22;
+					break;
+			}
+			
+			this.#html.style.left = (_size_x * 0.5 + this.#pos.x + _delta_x).toFixed(0) + 'px';
+			this.#html.style.top = (_size_z * 0.5 - this.#pos.z + _delta_z).toFixed(0) + 'px';
+			this.#html.title = _title.join("\n");		
+			
+			this.added(_entities_layer);
+		}
+	}
+	</script>
+</head>
+<body>
+	<div id="container">
+		<div id="map"/><img></div>
+		<div id="traders"></div>
+		<div id="compas"></div>
+		<div id="entities"></div>
+		<div id="actions" class="noselect">
+			<!--a href="javascript:;" onclick="_follow();" id="follow">follow off</a>
+			<a href="javascript:;" onclick="_follow();" id="follow">follow off</a-->
+			<div id="follow" onclick="_follow(!_is_follow);">
+				<input type="checkbox"/>
+				<label>follow</input></label>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	
+	let _7dtd_entities = {};
+	let _entities_layer = document.getElementById("entities");
+
+	let _own = 0;
+	let _is_follow = false;
+	
+	let _size_x = 0;
+	let _size_z = 0;
+
+	function SetMapSize(x, z)
+	{
+		_size_x = x;
+		_size_z = z;
+		let _container_style = document.createElement('style');
+		_container_style.innerHTML = "#container{width: " + x + "px; height: " + z + "px;}";
+		document.querySelector('head').appendChild(_container_style);
+	}
+
+	function SetPlayer(index)
+	{	
+		_own = index;
+		if(!!_7dtd_entities[index])
+		{		
+			_7dtd_entities[index].player();
+		}
+	}
+
+	function SetMapTraders(base64)
+	{
+		var dataUrl = "data:application/octet-binary;base64," + base64;
+		fetch(dataUrl)
+		.then(res => res.arrayBuffer())
+		.then(buffer => {
+			
+			let _reader = new ByteRreader(buffer);
+			let _trader_layer = document.querySelector('#traders');
+			
+			let _count = _reader.ReadInt8();
+			for(let i = 0; i < _count; ++i)
+			{
+				let _type = _reader.ReadInt8();
+				let _poi_x = _reader.ReadInt32();
+				let _poi_z = _reader.ReadInt32();
+				let _poi_name = _reader.ReadString();
+				
+				console.log("POI: " + _poi_name + " x:" + _poi_x + " z: " + _poi_z);
+				
+				let _poi_element = document.createElement('div');
+				_poi_element.classList.add("poi" + _type);
+				//_poi_element.setAttribute("style", "");
+				_poi_element.style.left = (_size_x * 0.5 + _poi_x).toFixed(0) + 'px';
+				_poi_element.style.top = (_size_z * 0.5 - _poi_z).toFixed(0) + 'px';
+				_trader_layer.appendChild(_poi_element);
+			}		
+		});
+	}
+
+	function SetEntityFocus(user)
+	{
+		if(!!_7dtd_entities[user] !== false)
+		{
+			_7dtd_entities[user].focus();
+		}
+	}
+
+	function _follow(value)
+	{
+		_is_follow = value;	
+		var _element = document.querySelector("#follow > input");
+		_element.checked = _is_follow;
+	}
+
+	function _follow_step(timestamp)
+	{
+		if(_is_follow)
+		{
+			SetEntityFocus(_own);
+		}
+		window.requestAnimationFrame(_follow_step);
+	}
+
+	window.requestAnimationFrame(_follow_step);
+
+	var _in_radius = {};
+
+	function _danger()
+	{
+		if(!!_7dtd_entities[_own] !== false)
+		{
+			let _player = _7dtd_entities[_own];
+			if(_player.position.y > 0)
+			{
+				for(let user in _7dtd_entities)
+				{
+					if(user == _own) continue;
+					let _enemy = _7dtd_entities[user];
+					if(_enemy.type !== SpawnTypeIndex.Players) continue;
+
+					let _x_dis = _enemy.position.x - _player.position.x;
+					let _y_dis = _enemy.position.z - _player.position.z;
+					let _distance = Math.sqrt(_x_dis * _x_dis + _y_dis * _y_dis);
+					
+					let _distance_title = _distance > 999 ? (_distance * 0.001).toFixed(0) + "km" : _distance.toFixed(0) + "m";
+					_distance_title += _enemy.position.y > _player.position.y ? " ↑" : " ↓";
+					_enemy.distance(_distance_title);
+					
+					// dispose
+					if(!!_in_radius[user] !== false)
+					{
+						if(_distance > 200)
+						{
+							delete _in_radius[user];
+						}
+					} else
+					{
+						if(_distance < 200)
+						{
+							_in_radius[user] = 1;
+							chrome.webview.hostObjects._callback.Danger();					
+						}
+					}			
+				}
+			}
+		}
+	}
+
+	function SetWindowCompact(value)
+	{
+		document.querySelector('body').classList.toggle("compact", value);
+		_follow(true);
+	}
+
+	function SetMapRender(base64)
+	{
+		var _image = document.querySelector('#map > img');
+		_image.src = "data:image/bmp;base64," + base64;
+	}
+
+	function ParseEntities(base64)
+	{
+		var _time = new Date().getTime();
+		var dataUrl = "data:application/octet-binary;base64," + base64;
+		//alert(dataUrl);
+		fetch(dataUrl)
+		.then(res => res.arrayBuffer())
+		.then(buffer => {
+			let _reader = new ByteRreader(buffer);
+			
+			let count = _reader.ReadInt32();
+			let _exists = [];
+			for(let i = 0; i < count; ++i)
+			{
+				let _user_id = _reader.ReadInt32();
+				_exists.push(_user_id);
+				
+				if(!!_7dtd_entities[_user_id] === false)
+				{
+					let _entity = new Entity7d2d(_user_id);
+					_7dtd_entities[_user_id] = _entity;			
+				}
+				
+				_7dtd_entities[_user_id].update(_reader);
+			}
+			
+			// remove non exists
+			let _keys = Object.keys(_7dtd_entities);
+			for(let i = 0; i < _keys.length; ++i)
+			{
+				let _user_id = parseInt(_keys[i]);
+				if(_exists.indexOf(_user_id) === -1)
+				{
+					_7dtd_entities[_user_id].remove();
+					delete _7dtd_entities[_user_id];
+				}
+			}
+			
+			//console.log("parse: " + (new Date().getTime() - _time));
+			_danger();
+		});
+	} 
+		
+	document.addEventListener('DOMContentLoaded', function()
+	{
+		chrome.webview.hostObjects._callback.Init();
+	});
+
+	</script>
+
+</body>
+</html>
